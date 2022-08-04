@@ -29,15 +29,26 @@ provider "aws" {
   profile                  = "myprofile"
 }
 
+module "shared_s3_bucket" {
+  source = "github.com/uktrade/terraform-aws-mtasts/s3"
+  tags   = local.default_tags
+
+  providers = {
+    aws.account = aws.myregion
+  }
+  
+}
+
 module "mtastspolicy_examplecom" {
-  source          = "github.com/uktrade/terraform-aws-mtasts"
-  domain          = "example.com"
-  mx              = ["mail.example.com"]
-  mode            = "testing"
-  reporting_email = "tlsreporting@example.com"
-  cf_price_class  = "PriceClass_200"
-  cf_waf_web_acl  = "arn:aws:waf___"
-  tags            = { "Terraform_source_repo" = "my-terraform-mta-sts-repo" }
+  source           = "github.com/uktrade/terraform-aws-mtasts/mta-sts"
+  domain           = "example.com"
+  mx               = ["mail.example.com"]
+  mode             = "testing"
+  reporting_email  = "tlsreporting@example.com"
+  s3_policy_bucket = module.shared_s3_bucket.s3_policy_bucket
+  cf_price_class   = "PriceClass_200"
+  cf_waf_web_acl   = "arn:aws:waf___"
+  tags             = { "Terraform_source_repo" = "my-terraform-mta-sts-repo" }
   providers = {
     aws.useast1 = aws.useast1
     aws.account = aws.myregion
