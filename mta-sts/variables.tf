@@ -38,6 +38,11 @@ variable "reporting_email" {
   description = "(Optional) Email to use for TLS-RPT reporting."
 }
 
+variable "s3_policy_bucket" {
+  type        = map(string)
+  description = "Map of variables relating to the Shared S3 bucket. Comes from the S3 module."
+}
+
 variable "tags" {
   type        = map(string)
   default     = {}
