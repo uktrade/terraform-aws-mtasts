@@ -43,21 +43,9 @@ resource "aws_acm_certificate_validation" "cert" {
   provider                = aws.useast1
 }
 
-resource "aws_s3_bucket" "policybucket" {
-  bucket   = local.bucketname
-  tags     = local.tags
-  provider = aws.account
-}
-
-resource "aws_s3_bucket_acl" "policybucket_acl" {
-  bucket   = aws_s3_bucket.policybucket.id
-  acl      = "private"
-  provider = aws.account
-}
-
 resource "aws_s3_object" "mtastspolicyfile" {
   key          = "${var.domain}/.well-known/mta-sts.txt"
-  bucket       = aws_s3_bucket.policybucket.id
+  bucket       = var.s3_policy_bucket["s3_policybucket_id"]
   content      = templatefile("${path.module}/mta-sts.templatefile",
     {
       max_age  = var.max_age
@@ -79,12 +67,12 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   provider    = aws.account
 
   origin {
-    domain_name = aws_s3_bucket.policybucket.bucket_regional_domain_name
+    domain_name = var.s3_policy_bucket["s3_policybucket_regional_domain_name"]
     origin_id   = local.s3_origin_id
     origin_path = "/${var.domain}"
 
     s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.policybucketoai.cloudfront_access_identity_path
+      origin_access_identity = var.s3_policy_bucket["cloudfront_oai_path"]
     }
   }
 
@@ -118,30 +106,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2018"
   }
-}
-
-resource "aws_cloudfront_origin_access_identity" "policybucketoai" {
-  comment  = "OAI for MTA-STS policy bucket (${var.domain})"
-  provider = aws.account
-}
-
-data "aws_iam_policy_document" "s3_policy" {
-  provider = aws.account
-  statement {
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.policybucket.arn}/*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.policybucketoai.iam_arn]
-    }
-  }
-}
-
-resource "aws_s3_bucket_policy" "policybucketpolicy" {
-  bucket   = aws_s3_bucket.policybucket.id
-  policy   = data.aws_iam_policy_document.s3_policy.json
-  provider = aws.account
 }
 
 resource "aws_route53_record" "cloudfrontalias" {
