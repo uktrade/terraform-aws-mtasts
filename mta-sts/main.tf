@@ -56,7 +56,7 @@ resource "aws_s3_bucket_acl" "policybucket_acl" {
 }
 
 resource "aws_s3_object" "mtastspolicyfile" {
-  key          = ".well-known/mta-sts.txt"
+  key          = "${var.domain}/.well-known/mta-sts.txt"
   bucket       = aws_s3_bucket.policybucket.id
   content      = templatefile("${path.module}/mta-sts.templatefile",
     {
@@ -81,6 +81,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
     domain_name = aws_s3_bucket.policybucket.bucket_regional_domain_name
     origin_id   = local.s3_origin_id
+    origin_path = "/${var.domain}"
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.policybucketoai.cloudfront_access_identity_path
