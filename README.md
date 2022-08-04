@@ -49,6 +49,25 @@ module "mtastspolicy_examplecom" {
   cf_price_class   = "PriceClass_200"
   cf_waf_web_acl   = "arn:aws:waf___"
   tags             = { "Terraform_source_repo" = "my-terraform-mta-sts-repo" }
+  
+  providers = {
+    aws.useast1 = aws.useast1
+    aws.account = aws.myregion
+  }
+
+}
+```
+
+Additional MTA STS resources can then be deployed, sharing the same S3 bucket via the `s3_policy_bucket` variable. This is making use of the `origin_path` configuration in CloudFront.
+
+```terraform
+module "mtastspolicy_examplecom_2" {
+  source           = "github.com/uktrade/terraform-aws-mtasts/mta-sts"
+  domain           = "example2.com"
+  mx               = ["mail.example2.com"]
+  reporting_email  = "tlsreporting@example2.com"
+  s3_policy_bucket = module.shared_s3_bucket.s3_policy_bucket
+
   providers = {
     aws.useast1 = aws.useast1
     aws.account = aws.myregion
