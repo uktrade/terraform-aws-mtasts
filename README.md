@@ -2,7 +2,7 @@
 
 NOTE: This repo [uktrade/terraform-aws-mtasts](https://github.com/uktrade/terraform-aws-mtasts) is forked from [ukncsc/terraform-aws-mtasts](https://github.com/ukncsc/terraform-aws-mtasts).
 
-This repo contains a module for deploying an [MTS-STS](https://tools.ietf.org/html/rfc8461) and [TLS-RPT](https://tools.ietf.org/html/rfc8460) policy for a domin in AWS using [Terraform](https://www.terraform.io/).
+This repo contains a module for deploying an [MTA-STS](https://tools.ietf.org/html/rfc8461) and [TLS-RPT](https://tools.ietf.org/html/rfc8460) policy for a domain in AWS using [Terraform](https://www.terraform.io/).
 
 This consists of using CloudFront/S3 with a Custom Domain to host the MTA-STS policy, with a TLS certificate provided by AWS ACM. It uses Route53 to configure the DNS portions of both MTA-STS and TLS-RPT.
 
@@ -49,7 +49,7 @@ module "mtastspolicy_examplecom" {
   cf_price_class   = "PriceClass_200"
   cf_waf_web_acl   = "arn:aws:waf___"
   tags             = { "Terraform_source_repo" = "my-terraform-mta-sts-repo" }
-  
+
   providers = {
     aws.useast1 = aws.useast1
     aws.account = aws.myregion
