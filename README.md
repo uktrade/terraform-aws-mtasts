@@ -1,6 +1,6 @@
 # MTA-STS/TLS-RPT AWS Module
 
-NOTE: This repo [uktrade/terraform-aws-mtasts](https://github.com/uktrade/terraform-aws-mtasts) is forked from [ukncsc/terraform-aws-mtasts](https://github.com/ukncsc/terraform-aws-mtasts).
+NOTE: This repo is forked from [ukncsc/terraform-aws-mtasts](https://github.com/ukncsc/terraform-aws-mtasts).
 
 This repo contains a module for deploying an [MTA-STS](https://tools.ietf.org/html/rfc8461) and [TLS-RPT](https://tools.ietf.org/html/rfc8460) policy for a domain in AWS using [Terraform](https://www.terraform.io/).
 
