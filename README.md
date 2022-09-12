@@ -1,6 +1,8 @@
 # MTA-STS/TLS-RPT AWS Module
 
-This repo contains a module for deploying an [MTS-STS](https://tools.ietf.org/html/rfc8461) and [TLS-RPT](https://tools.ietf.org/html/rfc8460) policy for a domin in AWS using [Terraform](https://www.terraform.io/).
+NOTE: This repo is forked from [ukncsc/terraform-aws-mtasts](https://github.com/ukncsc/terraform-aws-mtasts).
+
+This repo contains a module for deploying an [MTA-STS](https://tools.ietf.org/html/rfc8461) and [TLS-RPT](https://tools.ietf.org/html/rfc8460) policy for a domain in AWS using [Terraform](https://www.terraform.io/).
 
 This consists of using CloudFront/S3 with a Custom Domain to host the MTA-STS policy, with a TLS certificate provided by AWS ACM. It uses Route53 to configure the DNS portions of both MTA-STS and TLS-RPT.
 
@@ -27,15 +29,45 @@ provider "aws" {
   profile                  = "myprofile"
 }
 
+module "shared_s3_bucket" {
+  source = "github.com/uktrade/terraform-aws-mtasts/s3"
+  tags   = local.default_tags
+
+  providers = {
+    aws.account = aws.myregion
+  }
+  
+}
+
 module "mtastspolicy_examplecom" {
-  source          = "github.com/ukncsc/terraform-aws-mtasts"
-  domain          = "example.com"
-  mx              = ["mail.example.com"]
-  mode            = "testing"
-  reporting_email = "tlsreporting@example.com"
-  cf_price_class  = "PriceClass_200"
-  cf_waf_web_acl  = "arn:aws:waf___"
-  tags            = { "Terraform_source_repo" = "my-terraform-mta-sts-repo" }
+  source           = "github.com/uktrade/terraform-aws-mtasts/mta-sts"
+  domain           = "example.com"
+  mx               = ["mail.example.com"]
+  mode             = "testing"
+  reporting_email  = "tlsreporting@example.com"
+  s3_policy_bucket = module.shared_s3_bucket.s3_policy_bucket
+  cf_price_class   = "PriceClass_200"
+  cf_waf_web_acl   = "arn:aws:waf___"
+  tags             = { "Terraform_source_repo" = "my-terraform-mta-sts-repo" }
+
+  providers = {
+    aws.useast1 = aws.useast1
+    aws.account = aws.myregion
+  }
+
+}
+```
+
+Additional MTA STS resources can then be deployed, sharing the same S3 bucket via the `s3_policy_bucket` variable. This is making use of the `origin_path` configuration in CloudFront.
+
+```terraform
+module "mtastspolicy_examplecom_2" {
+  source           = "github.com/uktrade/terraform-aws-mtasts/mta-sts"
+  domain           = "example2.com"
+  mx               = ["mail.example2.com"]
+  reporting_email  = "tlsreporting@example2.com"
+  s3_policy_bucket = module.shared_s3_bucket.s3_policy_bucket
+
   providers = {
     aws.useast1 = aws.useast1
     aws.account = aws.myregion
