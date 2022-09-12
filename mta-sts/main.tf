@@ -106,6 +106,14 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2018"
   }
+
+  lifecycle {
+    ignore_changes = [
+      logging_config,
+      web_acl_id
+    ]
+  }
+
 }
 
 resource "aws_route53_record" "cloudfrontalias" {
